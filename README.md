@@ -1,13 +1,13 @@
 # Express TS Better-auth starter kit
 
-A modern backend boilerplate using **Express.js**, **TypeScript**, **Better Auth**, and **Drizzle ORM** with PostgreSQL.
+A modern backend boilerplate using **Express.js**, **TypeScript**, **Better Auth**, and **Prisma ORM** with PostgreSQL.
 
 ## 🛠️ Tech Stack
 
 - **Framework**: [Express.js](https://expressjs.com/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Authentication**: [Better Auth](https://better-auth.com/)
-- **Database ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Database ORM**: [Prisma ORM](https://www.prisma.io/)
 - **Testing**: [Vitest](https://vitest.dev/) & [Supertest](https://github.com/ladjs/supertest)
 - **Runtime**: [Bun](https://bun.sh/)
 
@@ -15,10 +15,11 @@ A modern backend boilerplate using **Express.js**, **TypeScript**, **Better Auth
 
 ```text
 .
-├── drizzle/            # Generated database migrations
+├── prisma/             # Prisma schema and migrations
+│   └── schema.prisma
 ├── src/                # Application source code
 │   ├── config/         # Environment variables and configurations
-│   ├── db/             # Drizzle setup, schemas, and relations
+│   ├── db/             # Prisma client initialization
 │   ├── errors/         # Custom error classes (AppError, NotFound, etc.)
 │   ├── lib/            # External library setup (e.g., Better Auth configuration)
 │   ├── middlewares/    # Express middlewares (error handler, auth guard, roles)
@@ -29,7 +30,6 @@ A modern backend boilerplate using **Express.js**, **TypeScript**, **Better Auth
 │   ├── helpers/        # Test utilities (db cleaner, auth helper)
 │   ├── setup.ts        # Global test setup
 │   └── *.test.ts       # Test files
-├── drizzle.config.ts   # Drizzle ORM configuration
 ├── vitest.config.ts    # Vitest configuration
 └── package.json        # Dependencies and scripts
 ```
@@ -48,10 +48,10 @@ A modern backend boilerplate using **Express.js**, **TypeScript**, **Better Auth
    ```
 
 3. **Database Setup**
-   Generate and push your database schema using Drizzle:
+   Generate Prisma client and push database schema:
    ```bash
-   bunx drizzle-kit generate
-   bunx drizzle-kit push
+   bun run db:generate
+   bun run db:push
    ```
 
 4. **Run the server**

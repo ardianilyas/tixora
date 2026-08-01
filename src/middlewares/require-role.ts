@@ -1,8 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import * as schema from "../db/schemas";
+import type { UserRole } from "../shared/types/express";
 import { sendError } from "../shared/utils/response";
-
-type UserRole = typeof schema.roleEnum.enumValues[number];
 
 export const requireRole = (...roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -13,5 +11,5 @@ export const requireRole = (...roles: UserRole[]) => {
     if (!roles.includes(user.role)) return sendError(res, "Forbidden", 403);
 
     next();
-  }
-}
+  };
+};

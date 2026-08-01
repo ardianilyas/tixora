@@ -1,13 +1,13 @@
 import "express";
-import type { roleEnum } from "../../db/schemas";
+import type { Role } from "@prisma/client";
 
-type UserRole = typeof roleEnum.enumValues[number];
+export type UserRole = Role;
 
 export interface SessionUser {
   id: string;
   name?: string;
   email: string;
-  role: UserRole,
+  role: UserRole;
   image?: string | null | undefined;
 }
 

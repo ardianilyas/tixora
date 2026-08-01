@@ -1,12 +1,7 @@
-import { sql } from "drizzle-orm";
-import { db } from "../../src/db";
+import { prisma } from "../../src/db";
 
 export async function clearDb() {
-  await db.execute(
-    sql.raw(`
-      TRUNCATE TABLE
-      RESTART IDENTITY
-      CASCADE;
-    `)
-  );
+  await prisma.$executeRawUnsafe(`
+    TRUNCATE TABLE "user", "session", "account", "verification" RESTART IDENTITY CASCADE;
+  `);
 }

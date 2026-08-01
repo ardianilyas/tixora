@@ -1,12 +1,10 @@
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "../db";
-import * as schema from "../db/schemas";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { prisma } from "../db";
 
 export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "pg",
-    schema
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
   }),
   emailAndPassword: {
     enabled: true,
@@ -14,7 +12,7 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       role: {
-        type: schema.roleEnum.enumValues,
+        type: "string",
         required: false,
         defaultValue: "user",
         input: false
