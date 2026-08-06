@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import { Prisma } from "@prisma/client";
 
 import { AppError } from "../errors/app-error";
 
@@ -20,6 +21,53 @@ export const errorHandler = (
         field: issue.path.join("."),
         message: issue.message,
       })),
+    });
+  }
+
+  /**
+   * Prisma Known Request Errors
+   */
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (err.code) {
+      case "P2002": {
+        const target = Array.isArray(err.meta?.target)
+          ? err.meta.target.join(", ")
+          : err.meta?.target;
+        return res.status(409).json({
+          success: false,
+          message: target
+            ? `Unique constraint violation on field(s): ${target}`
+            : "A record with this value already exists",
+        });
+      }
+      case "P2025": {
+        return res.status(404).json({
+          success: false,
+          message: (err.meta?.cause as string) || "Record not found",
+        });
+      }
+      case "P2003": {
+        return res.status(400).json({
+          success: false,
+          message: "Foreign key constraint failed",
+        });
+      }
+      default: {
+        return res.status(400).json({
+          success: false,
+          message: `Database error: ${err.message}`,
+        });
+      }
+    }
+  }
+
+  /**
+   * Prisma Validation Error
+   */
+  if (err instanceof Prisma.PrismaClientValidationError) {
+    return res.status(400).json({
+      success: false,
+      message: "Database validation error",
     });
   }
 
