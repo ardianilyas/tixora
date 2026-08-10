@@ -23,6 +23,7 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
   sessions      Session[]
   accounts      Account[]
+  tickets       Ticket[]
 
   @@map("user")
 }
@@ -72,4 +73,34 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Category {
+  id          String @id @default(ulid())
+  name        String
+  description String
+  
+  tickets     Ticket[]
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model Ticket {
+  id          String @id @default(ulid())
+  title       String
+  description String @db.Text
+
+  userId      String @map("user_id")
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  categoryId  String @map("category_id")
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  @@map("tickets")
 }
