@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import type { UserRole } from "../shared/types/express";
-import { sendError } from "../shared/utils/response";
+import type { UserRole } from "../types/express";
+import { sendError } from "../utils/response";
 
 export const requireRole = (...roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {

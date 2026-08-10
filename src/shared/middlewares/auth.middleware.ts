@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import { auth } from "../lib/auth";
 import { fromNodeHeaders } from "better-auth/node";
-import { AUTH_MESSAGE, AUTH_STATUS_CODE } from "../shared/constants/auth.constants";
-import type { UserRole } from "../shared/types/express";
+import { AUTH_MESSAGE, AUTH_STATUS_CODE } from "../constants/auth.constants";
+import type { UserRole } from "../types/express";
 
 export async function authMiddleware(
   req: Request, res: Response, next: NextFunction
