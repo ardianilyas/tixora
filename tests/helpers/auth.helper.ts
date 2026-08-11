@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../../src/server";
-import { prisma } from "../../src/db";
+import { prisma } from "../../src/shared/lib/prisma";
 import type { UserRole } from "../../src/shared/types/express";
 
 export async function authenticate(role: UserRole = "user") {
