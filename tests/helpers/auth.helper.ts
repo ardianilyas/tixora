@@ -3,12 +3,14 @@ import app from "../../src/server";
 import { prisma } from "../../src/shared/lib/prisma";
 import type { UserRole } from "../../src/shared/types/express";
 
-export async function authenticate(role: UserRole = "user") {
+export async function authenticate(role: UserRole = "user", customEmail?: string) {
   const agent = request.agent(app);
+  const randomId = Math.random().toString(36).substring(2, 9);
+  const email = customEmail ?? `test-${Date.now()}-${randomId}@example.com`;
 
   const user = {
     name: "Test User",
-    email: "test@example.com",
+    email,
     password: "password123"
   };
 
@@ -16,7 +18,7 @@ export async function authenticate(role: UserRole = "user") {
     .post("/api/auth/sign-up/email")
     .send(user);
 
-  await prisma.user.update({
+  const dbUser = await prisma.user.update({
     where: { email: user.email },
     data: { role }
   });
@@ -29,7 +31,11 @@ export async function authenticate(role: UserRole = "user") {
     });
 
   return {
-    user,
+    user: {
+      ...user,
+      id: dbUser.id,
+      role: dbUser.role
+    },
     agent
   };
 }
