@@ -12,6 +12,19 @@ enum Role {
   user
 }
 
+enum TicketPriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  resolved
+}
+
 model User {
   id            String    @id
   name          String
@@ -23,7 +36,9 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
   sessions      Session[]
   accounts      Account[]
-  tickets       Ticket[]
+  
+  ticketsCreated  Ticket[] @relation("TicketCreator")
+  ticketAssigned  Ticket[] @relation("TicketAsignee")
 
   @@map("user")
 }
@@ -90,17 +105,26 @@ model Category {
 
 model Ticket {
   id          String @id @default(ulid())
+
+  code        String @unique
   title       String
   description String @db.Text
 
-  userId      String @map("user_id")
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      TicketStatus @default(open)
+  priority    TicketPriority @default(low)
+
+  creatorId   String @map("creator_id")
+  asigneeId   String? @map("asignee_id")
+
+  creator     User @relation("TicketCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  asignee     User? @relation("TicketAsignee", fields: [asigneeId], references: [id], onDelete: Cascade)
 
   categoryId  String @map("category_id")
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
+  resolvedAt  DateTime? @map("resolved_at")
   
   @@map("tickets")
 }
