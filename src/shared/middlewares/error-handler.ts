@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { Prisma } from "@prisma/client";
 
 import { AppError } from "../errors/app-error";
+import { Prisma } from "../../../generated/prisma/client";
 
 export const errorHandler = (
   err: Error,
@@ -41,9 +41,11 @@ export const errorHandler = (
         });
       }
       case "P2025": {
+        const model = err.meta?.modelName as string | undefined;
+
         return res.status(404).json({
           success: false,
-          message: (err.meta?.cause as string) || "Record not found",
+          message: model ? `${model} not found` : "Record not found",
         });
       }
       case "P2003": {
