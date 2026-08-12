@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { auth } from "../lib/auth";
 import { prisma } from "../lib/prisma";
-import type { Role } from "../../../generated/prisma/enums";
+import type { Role, User } from "../../../generated/prisma";
 
 export type SeedUserData = {
   name?: string;
@@ -12,20 +12,41 @@ export type SeedUserData = {
   emailVerified?: boolean;
 };
 
-export async function seedUser(data: SeedUserData = {}) {
-  try {
+export type SeededUser = User & {
+  plainPassword?: string;
+  token?: string;
+};
+
+/**
+ * Seed User factory function.
+ *
+ * Usage:
+ * - seedUser()                          -> Creates 1 user
+ * - seedUser({ role: "admin" })         -> Creates 1 user with overrides
+ * - seedUser(5)                         -> Creates 5 users
+ * - seedUser(5, { role: "admin" })      -> Creates 5 users with overrides
+ */
+export async function seedUser(overrides?: SeedUserData): Promise<SeededUser>;
+export async function seedUser(count: 1, overrides?: SeedUserData): Promise<SeededUser>;
+export async function seedUser(count: number, overrides?: SeedUserData): Promise<SeededUser[]>;
+export async function seedUser(
+  countOrOverrides: number | SeedUserData = 1,
+  overrideData: SeedUserData = {}
+): Promise<SeededUser | SeededUser[]> {
+  const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
+  const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
+
+  const users: SeededUser[] = [];
+
+  for (let i = 0; i < count; i++) {
     const randomId = Math.random().toString(36).substring(2, 9);
-    const name = data.name ?? faker.person.fullName();
-    const email = data.email ?? `user-${Date.now()}-${randomId}@example.com`;
-    const password = data.password ?? "Password123!";
-    const role = data.role ?? "user";
+    const name = overrides.name ?? faker.person.fullName();
+    const email = overrides.email ?? `user-${Date.now()}-${randomId}-${i}@example.com`;
+    const password = overrides.password ?? "Password123!";
+    const role = overrides.role ?? "user";
 
     const res = await auth.api.signUpEmail({
-      body: {
-        name,
-        email,
-        password,
-      },
+      body: { name, email, password },
     });
 
     if (!res?.user) {
@@ -36,28 +57,17 @@ export async function seedUser(data: SeedUserData = {}) {
       where: { id: res.user.id },
       data: {
         role,
-        image: data.image ?? res.user.image,
-        emailVerified: data.emailVerified ?? res.user.emailVerified,
+        image: overrides.image ?? res.user.image,
+        emailVerified: overrides.emailVerified ?? res.user.emailVerified,
       },
     });
 
-    return {
+    users.push({
       ...updatedUser,
       plainPassword: password,
       token: res.token,
-    };
-  } catch (error) {
-    console.error("Error seeding user:", error);
-    throw error;
+    });
   }
-}
 
-export async function seedUsers(length: number = 1, overrideData: SeedUserData = {}) {
-  const users = [];
-  for (let i = 0; i < length; i++) {
-    const user = await seedUser(overrideData);
-    users.push(user);
-  }
-  console.log(`Created ${users.length} users`);
-  return users;
+  return count === 1 ? users[0] : users;
 }

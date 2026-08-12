@@ -68,15 +68,16 @@ describe("Ticket feature tests", () => {
 
     it("should filter tickets by code", async () => {
       const auth = await authenticate();
-      const customTicket = await seedTicket({ code: "TXO-9999", categoryId });
+      const customCode = `TXO-9999-${Date.now()}`;
+      const customTicket = await seedTicket({ code: customCode, categoryId });
 
       const response = await auth.agent
         .get(TICKET_TEST_ROUTE.GET_TICKETS)
-        .query({ code: "TXO-9999" });
+        .query({ code: customCode });
 
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveLength(1);
-      expect(response.body.data[0].code).toBe("TXO-9999");
+      expect(response.body.data[0].code).toBe(customCode);
     });
 
     it("should filter tickets by status", async () => {

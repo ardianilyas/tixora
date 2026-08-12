@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { prisma } from "../lib/prisma";
 import { TicketPriority, TicketStatus } from "../../../generated/prisma/enums";
+import type { Ticket } from "../../../generated/prisma";
 import { seedCategory } from "./category.seeder";
 import { seedUser } from "./user.seeder";
 
@@ -13,45 +14,63 @@ export type CreateTicketData = {
   creatorId?: string;
   asigneeId?: string;
   categoryId?: string;
-  [key: string]: unknown;
 };
 
-export async function seedTicket(data: Partial<CreateTicketData> = {}) {
-  let categoryId = data.categoryId;
-  if (!categoryId) {
-    const category = await seedCategory();
-    if (!category) throw new Error("Failed to create category for ticket seed");
-    categoryId = category.id;
-  }
+/**
+ * Seed Ticket factory function.
+ *
+ * Usage:
+ * - seedTicket()                            -> Creates 1 ticket
+ * - seedTicket({ priority: "high" })       -> Creates 1 ticket with overrides
+ * - seedTicket(5)                           -> Creates 5 tickets
+ * - seedTicket(5, { status: "resolved" })   -> Creates 5 tickets with overrides
+ */
+export async function seedTicket(overrides?: CreateTicketData): Promise<Ticket>;
+export async function seedTicket(count: 1, overrides?: CreateTicketData): Promise<Ticket>;
+export async function seedTicket(count: number, overrides?: CreateTicketData): Promise<Ticket[]>;
+export async function seedTicket(
+  countOrOverrides: number | CreateTicketData = 1,
+  overrideData: CreateTicketData = {}
+): Promise<Ticket | Ticket[]> {
+  const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
+  const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 
-  let creatorId = data.creatorId;
-  if (!creatorId) {
-    const user = await seedUser();
-    creatorId = user.id;
-  }
+  const tickets: Ticket[] = [];
 
-  const count = await prisma.ticket.count();
-  const code = data.code ?? `TXO-${String(count + 1).padStart(4, "0")}`;
+  for (let i = 0; i < count; i++) {
+    let categoryId = overrides.categoryId;
+    if (!categoryId) {
+      const category = await seedCategory();
+      categoryId = category.id;
+    }
 
-  return prisma.ticket.create({
-    data: {
-      code,
-      title: data.title ?? faker.lorem.sentence(),
-      description: data.description ?? faker.lorem.paragraph(),
-      status: data.status ?? TicketStatus.open,
-      priority: data.priority ?? TicketPriority.low,
-      creatorId,
-      asigneeId: data.asigneeId,
-      categoryId,
-    },
-  });
-}
+    let creatorId = overrides.creatorId;
+    if (!creatorId) {
+      const user = await seedUser();
+      creatorId = user.id;
+    }
 
-export async function seedTickets(length: number = 1, overrideData: Partial<CreateTicketData> = {}) {
-  const tickets = [];
-  for (let i = 0; i < length; i++) {
-    const ticket = await seedTicket(overrideData);
+    let code = overrides.code;
+    if (!code) {
+      const randomId = Math.random().toString(36).substring(2, 7).toUpperCase();
+      code = `TXO-${Date.now().toString(36).toUpperCase()}-${randomId}-${i}`;
+    }
+
+    const ticket = await prisma.ticket.create({
+      data: {
+        code,
+        title: overrides.title ?? faker.lorem.sentence(),
+        description: overrides.description ?? faker.lorem.paragraph(),
+        status: overrides.status ?? TicketStatus.open,
+        priority: overrides.priority ?? TicketPriority.low,
+        creatorId,
+        asigneeId: overrides.asigneeId,
+        categoryId,
+      },
+    });
+
     tickets.push(ticket);
   }
-  return tickets;
+
+  return count === 1 ? tickets[0] : tickets;
 }

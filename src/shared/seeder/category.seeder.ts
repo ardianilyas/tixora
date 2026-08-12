@@ -1,42 +1,49 @@
 import { faker } from "@faker-js/faker";
 import { prisma } from "../lib/prisma";
+import type { Category } from "../../../generated/prisma";
 
 export type CreateCategoryData = {
   name?: string;
   description?: string;
-  [key: string]: unknown;
+};
+
+/**
+ * Generates default category attributes (Laravel Factory style).
+ */
+function makeCategoryData(overrides: CreateCategoryData = {}): CreateCategoryData {
+  return {
+    name: overrides.name ?? faker.commerce.department(),
+    description: overrides.description ?? faker.commerce.productDescription(),
+  };
 }
 
-export async function seedCategories(length: number = 1, data: CreateCategoryData = {}) {
-  try {
-    const categories = Array.from({ length }, (_, index) => ({
-      name: data.name ?? faker.commerce.department(),
-      description: data.description ?? faker.commerce.productDescription(),
-      ...data
-    }));
+/**
+ * Seed Category factory function.
+ *
+ * Usage:
+ * - seedCategory()                         -> Creates 1 category
+ * - seedCategory({ name: "IT" })          -> Creates 1 category with overrides
+ * - seedCategory(5)                        -> Creates 5 categories
+ * - seedCategory(5, { description: "..."}) -> Creates 5 categories with overrides
+ */
+export async function seedCategory(overrides?: CreateCategoryData): Promise<Category>;
+export async function seedCategory(count: 1, overrides?: CreateCategoryData): Promise<Category>;
+export async function seedCategory(count: number, overrides?: CreateCategoryData): Promise<Category[]>;
+export async function seedCategory(
+  countOrOverrides: number | CreateCategoryData = 1,
+  overrideData: CreateCategoryData = {}
+): Promise<Category | Category[]> {
+  const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
+  const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 
-    const result = await prisma.category.createMany({
-      data: categories,
-      skipDuplicates: true
+  const categories: Category[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const category = await prisma.category.create({
+      data: makeCategoryData(overrides) as { name: string; description: string },
     });
-
-    console.log(`Created ${result.count} categories`);
-  } catch (error) {
-    console.error(error);
+    categories.push(category);
   }
-}
 
-export async function seedCategory() {
-  try {
-    const data = {
-      name: faker.commerce.department(),
-      description: faker.commerce.productDescription()
-    };
-
-    return prisma.category.create({
-      data
-    });
-  } catch (error) {
-    console.error(error);
-  }
+  return count === 1 ? categories[0] : categories;
 }
