@@ -1,7 +1,7 @@
 import { prisma } from "../../shared/lib/prisma";
 import { userSelect } from "../../shared/select/user.select";
 import type { TicketQuery } from "./ticket.constant";
-import type { CreateTicketDto, UpdateTicketDto } from "./ticket.dto";
+import type { CreateTicketDto, UpdateTicketDto, UpdateTicketStatusDto } from "./ticket.dto";
 
 export class TicketService {
   async getTickets(query: TicketQuery) {
@@ -71,6 +71,17 @@ export class TicketService {
     return prisma.ticket.delete({
       where: {
         id
+      }
+    });
+  }
+
+  async updateTicketStatus(status: UpdateTicketStatusDto["status"], id: string) {
+    return prisma.ticket.update({
+      where: {
+        id
+      },
+      data: {
+        status
       }
     });
   }

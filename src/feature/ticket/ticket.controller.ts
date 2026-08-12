@@ -3,7 +3,7 @@ import { asyncHandler } from "../../shared/utils/async-handler";
 import { sendSuccess } from "../../shared/utils/response";
 import { validate } from "../../shared/utils/validate";
 import { TICKET_SUCCESS_MESSAGE } from "./ticket.constant";
-import { createTicketDto, getTicketId, updateTicketDto } from "./ticket.dto";
+import { createTicketDto, getTicketId, updateTicketDto, updateTicketStatusDto } from "./ticket.dto";
 import type { TicketService } from "./ticket.service";
 import type { Request, Response } from "express";
 
@@ -38,5 +38,12 @@ export class TicketController {
     const id = validate(getTicketId, req.params.id);
     await this.ticketService.deleteTicket(id);
     sendSuccess(res, "", null, 204);
+  });
+
+  updateTicketStatus = asyncHandler(async(req: Request, res: Response) => {
+    const id = validate(getTicketId, req.params.id);
+    const status = validate(updateTicketStatusDto, req.body);
+    const ticket = await this.ticketService.updateTicketStatus(status["status"], id);
+    sendSuccess(res, TICKET_SUCCESS_MESSAGE.UPDATE_TICKET_STATUS, ticket);
   });
 }
