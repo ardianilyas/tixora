@@ -40,6 +40,8 @@ model User {
   ticketsCreated  Ticket[] @relation("TicketCreator")
   ticketAssigned  Ticket[] @relation("TicketAsignee")
 
+  comments        Comment[]
+
   @@map("user")
 }
 
@@ -121,10 +123,26 @@ model Ticket {
 
   categoryId  String @map("category_id")
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  comments    Comment[]
   
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
   resolvedAt  DateTime? @map("resolved_at")
   
   @@map("tickets")
+}
+
+model Comment {
+  id        String @id @default(ulid())
+  body      String @db.Text
+
+  authorId  String @map("author_id")
+  author    User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  ticketId  String @map("ticket_id")
+  ticket    Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
