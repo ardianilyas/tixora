@@ -1,4 +1,5 @@
 import { prisma } from "../../shared/lib/prisma";
+import { userSelect } from "../../shared/select/user.select";
 import type { TicketQuery } from "./ticket.constant";
 import type { CreateTicketDto, UpdateTicketDto } from "./ticket.dto";
 
@@ -24,6 +25,18 @@ export class TicketService {
     return prisma.ticket.findUniqueOrThrow({
       where: {
         id
+      },
+      include: {
+        creator: {
+          select: userSelect
+        },
+        comments: {
+          include: {
+            author: {
+              select: userSelect
+            }
+          }
+        }
       }
     });
   }
