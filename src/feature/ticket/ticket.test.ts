@@ -62,7 +62,7 @@ describe("Ticket feature tests", () => {
         .query({ assigneeId: auth.user.id });
 
       expect(response.status).toBe(200);
-      expect(response.body.data.length).toBe(1);
+      expect(response.body.data).toHaveLength(1);
       expect(response.body.data[0].id).toBe(assigneeTicket.id);
     });
 
@@ -75,7 +75,7 @@ describe("Ticket feature tests", () => {
         .query({ code: "TXO-9999" });
 
       expect(response.status).toBe(200);
-      expect(response.body.data.length).toBe(1);
+      expect(response.body.data).toHaveLength(1);
       expect(response.body.data[0].code).toBe("TXO-9999");
     });
 
@@ -354,4 +354,31 @@ describe("Ticket feature tests", () => {
       expect(deletedTicket).toBeNull();
     });
   });
+
+  describe("PATCH /api/tickets/:id/status", () => {
+    it("should return 401 when not authenticated", async () => {
+      const response = await request(app).get(TICKET_TEST_ROUTE.UPDATE_TICKET_STATUS(sampleTicketId));
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe("Unauthorized");
+    });
+    
+    it("should return 403 when user is not admin", async () => {
+      const auth = await authenticate();
+      const response = await auth.agent.get(TICKET_TEST_ROUTE.UPDATE_TICKET_STATUS(sampleTicketId));
+      expect(response.status).toBe(403);
+      expect(response.body.message).toBe("Forbidden");
+    });
+
+    it("should return 200 and perform partial update (updating status)", async () => {
+      const auth = await authenticate("admin");
+      const response = await auth.agent
+        .patch(TICKET_TEST_ROUTE.UPDATE_TICKET_STATUS(sampleTicketId))
+        .send({ status: TicketStatus.resolved });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe(TICKET_SUCCESS_MESSAGE.UPDATE_TICKET_STATUS);
+      expect(response.body.data.status).toBe(TicketStatus.resolved);
+    });
+  })
 });
