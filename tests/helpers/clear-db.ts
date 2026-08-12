@@ -2,6 +2,12 @@ import { prisma } from "../../src/shared/lib/prisma";
 
 export async function clearDb() {
   await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "user", "session", "account", "verification", "categories", "tickets", "Comment" RESTART IDENTITY CASCADE;
+    DELETE FROM "comments";
+    DELETE FROM "tickets";
+    DELETE FROM "categories";
+    DELETE FROM "verification";
+    DELETE FROM "account";
+    DELETE FROM "session";
+    DELETE FROM "user";
   `);
 }

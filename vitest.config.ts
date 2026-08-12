@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     globals: true,
     setupFiles: ["./tests/setup.ts"],
-    fileParallelism: false
-  }
+    fileParallelism: false,
+    maxWorkers: 1,
+    minWorkers: 1,
+  },
 });
