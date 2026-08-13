@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { auth } from "../lib/auth";
 import { prisma } from "../lib/prisma";
-import type { Role, User } from "../../../generated/prisma";
+import type { Role, User } from "../../../generated/prisma/client";
 
 export type SeedUserData = {
   name?: string;
@@ -65,9 +65,10 @@ export async function seedUser(
     users.push({
       ...updatedUser,
       plainPassword: password,
-      token: res.token,
+      token: res.token ?? undefined,
     });
   }
 
-  return count === 1 ? users[0] : users;
+  if (count === 1) return users[0]!;
+  return users;
 }

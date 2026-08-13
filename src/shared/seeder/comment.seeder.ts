@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { prisma } from "../lib/prisma";
-import type { Comment } from "../../../generated/prisma";
+import type { Comment } from "../../../generated/prisma/client";
 import { seedTicket } from "./ticket.seeder";
 import { seedUser } from "./user.seeder";
 
@@ -32,17 +32,8 @@ export async function seedComment(
   const comments: Comment[] = [];
 
   for (let i = 0; i < count; i++) {
-    let authorId = overrides.authorId;
-    if (!authorId) {
-      const author = await seedUser();
-      authorId = author.id;
-    }
-
-    let ticketId = overrides.ticketId;
-    if (!ticketId) {
-      const ticket = await seedTicket();
-      ticketId = ticket.id;
-    }
+    const authorId = overrides.authorId ?? (await seedUser()).id;
+    const ticketId = overrides.ticketId ?? (await seedTicket()).id;
 
     const comment = await prisma.comment.create({
       data: {
@@ -55,5 +46,6 @@ export async function seedComment(
     comments.push(comment);
   }
 
-  return count === 1 ? comments[0] : comments;
+  if (count === 1) return comments[0]!;
+  return comments;
 }

@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { prisma } from "../lib/prisma";
-import type { Category } from "../../../generated/prisma";
+import type { Category } from "../../../generated/prisma/client";
 
 export type CreateCategoryData = {
   name?: string;
@@ -45,5 +45,6 @@ export async function seedCategory(
     categories.push(category);
   }
 
-  return count === 1 ? categories[0] : categories;
+  if (count === 1) return categories[0]!;
+  return categories;
 }

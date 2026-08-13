@@ -1,9 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { prisma } from "../lib/prisma";
 import { TicketPriority, TicketStatus } from "../../../generated/prisma/enums";
-import type { Ticket } from "../../../generated/prisma";
 import { seedCategory } from "./category.seeder";
 import { seedUser } from "./user.seeder";
+import type { Ticket } from "../../../generated/prisma/client";
 
 export type CreateTicketData = {
   code?: string;
@@ -12,7 +12,7 @@ export type CreateTicketData = {
   status?: TicketStatus;
   priority?: TicketPriority;
   creatorId?: string;
-  asigneeId?: string;
+  assigneeId?: string;
   categoryId?: string;
 };
 
@@ -38,22 +38,13 @@ export async function seedTicket(
   const tickets: Ticket[] = [];
 
   for (let i = 0; i < count; i++) {
-    let categoryId = overrides.categoryId;
-    if (!categoryId) {
-      const category = await seedCategory();
-      categoryId = category.id;
-    }
-
-    let creatorId = overrides.creatorId;
-    if (!creatorId) {
-      const user = await seedUser();
-      creatorId = user.id;
-    }
+    const categoryId = overrides.categoryId ?? (await seedCategory()).id;
+    const creatorId = overrides.creatorId ?? (await seedUser()).id;
 
     let code = overrides.code;
-    if (!code) {
+    if (!code || count > 1) {
       const randomId = Math.random().toString(36).substring(2, 7).toUpperCase();
-      code = `TXO-${Date.now().toString(36).toUpperCase()}-${randomId}-${i}`;
+      code = overrides.code && count === 1 ? overrides.code : `TXO-${Date.now().toString(36).toUpperCase()}-${randomId}-${i}`;
     }
 
     const ticket = await prisma.ticket.create({
@@ -64,7 +55,7 @@ export async function seedTicket(
         status: overrides.status ?? TicketStatus.open,
         priority: overrides.priority ?? TicketPriority.low,
         creatorId,
-        asigneeId: overrides.asigneeId,
+        assigneeId: overrides.assigneeId,
         categoryId,
       },
     });
@@ -72,5 +63,9 @@ export async function seedTicket(
     tickets.push(ticket);
   }
 
-  return count === 1 ? tickets[0] : tickets;
+  if (count === 1) {
+    return tickets[0]!;
+  }
+
+  return tickets;
 }
