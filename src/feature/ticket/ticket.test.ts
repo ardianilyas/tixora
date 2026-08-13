@@ -55,7 +55,7 @@ describe("Ticket feature tests", () => {
 
     it("should filter tickets by assigneeId", async () => {
       const auth = await authenticate();
-      const assigneeTicket = await seedTicket({ asigneeId: auth.user.id, categoryId });
+      const assigneeTicket = await seedTicket({ assigneeId: auth.user.id, categoryId });
 
       const response = await auth.agent
         .get(TICKET_TEST_ROUTE.GET_TICKETS)
@@ -358,14 +358,14 @@ describe("Ticket feature tests", () => {
 
   describe("PATCH /api/tickets/:id/status", () => {
     it("should return 401 when not authenticated", async () => {
-      const response = await request(app).get(TICKET_TEST_ROUTE.UPDATE_TICKET_STATUS(sampleTicketId));
+      const response = await request(app).patch(TICKET_TEST_ROUTE.UPDATE_TICKET_STATUS(sampleTicketId));
       expect(response.status).toBe(401);
       expect(response.body.message).toBe("Unauthorized");
     });
     
     it("should return 403 when user is not admin", async () => {
       const auth = await authenticate();
-      const response = await auth.agent.get(TICKET_TEST_ROUTE.UPDATE_TICKET_STATUS(sampleTicketId));
+      const response = await auth.agent.patch(TICKET_TEST_ROUTE.UPDATE_TICKET_STATUS(sampleTicketId));
       expect(response.status).toBe(403);
       expect(response.body.message).toBe("Forbidden");
     });
@@ -380,6 +380,35 @@ describe("Ticket feature tests", () => {
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe(TICKET_SUCCESS_MESSAGE.UPDATE_TICKET_STATUS);
       expect(response.body.data.status).toBe(TicketStatus.resolved);
+    });
+  });
+  describe("PATCH /api/tickets/:id/assignee", () => {
+    it("should return 401 when not authenticated", async () => {
+      const response = await request(app).patch(TICKET_TEST_ROUTE.ASSIGN_TICKET_TO_AGENT(sampleTicketId));
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe("Unauthorized");
+    });
+    it("should return 403 when user is not admin", async() => {
+      const auth = await authenticate();
+      const response = await auth.agent.patch(TICKET_TEST_ROUTE.ASSIGN_TICKET_TO_AGENT(sampleTicketId));
+      expect(response.status).toBe(403);
+      expect(response.body.message).toBe("Forbidden");
+    });
+    it("should return 404 when ticket id is invalid", async() => {
+      const auth = await authenticate("admin");
+      const response = await auth.agent.patch(TICKET_TEST_ROUTE.ASSIGN_TICKET_TO_AGENT(invalidId)).send({
+        assigneeId: "invalidId"
+      });
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe(TICKET_NOT_FOUND_MESSAGE);
+    });
+    it("should return 200 and assign ticket to agent", async() => {
+      const auth = await authenticate("admin");
+      const agent = await authenticate("agent");
+      const response = await auth.agent.patch(TICKET_TEST_ROUTE.ASSIGN_TICKET_TO_AGENT(sampleTicketId)).send({ assigneeId: agent.user.id });
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe(TICKET_SUCCESS_MESSAGE.ASSIGN_TICKET_TO_AGENT);
     });
   })
 });

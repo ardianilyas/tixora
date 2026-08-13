@@ -28,8 +28,8 @@ describe("Seeder Factory Tests (Laravel Factory Style)", () => {
     const admins = await seedUser(2, { role: "admin" });
     expect(Array.isArray(admins)).toBe(true);
     expect(admins).toHaveLength(2);
-    expect(admins[0].role).toBe("admin");
-    expect(admins[1].role).toBe("admin");
+    expect(admins[0]!.role).toBe("admin");
+    expect(admins[1]!.role).toBe("admin");
   });
 
   it("should seed single ticket and multiple tickets", async () => {
@@ -40,7 +40,7 @@ describe("Seeder Factory Tests (Laravel Factory Style)", () => {
     const tickets = await seedTicket(2, { priority: "critical" });
     expect(Array.isArray(tickets)).toBe(true);
     expect(tickets).toHaveLength(2);
-    expect(tickets[0].priority).toBe("critical");
+    expect(tickets[0]!.priority).toBe("critical");
   });
 
   it("should seed single comment and multiple comments", async () => {
@@ -53,6 +53,6 @@ describe("Seeder Factory Tests (Laravel Factory Style)", () => {
     const comments = await seedComment(3, { body: "Custom comment body" });
     expect(Array.isArray(comments)).toBe(true);
     expect(comments).toHaveLength(3);
-    expect(comments[0].body).toBe("Custom comment body");
+    expect(comments[0]!.body).toBe("Custom comment body");
   });
 });
