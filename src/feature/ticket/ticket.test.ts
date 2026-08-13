@@ -29,15 +29,41 @@ describe("Ticket feature tests", () => {
       expect(response.body.message).toBe("Unauthorized");
     });
 
-    it("should return 200 and list of tickets when user is authenticated", async () => {
+    it("should return 200 and list of tickets with pagination meta when user is authenticated", async () => {
       const auth = await authenticate();
       const response = await auth.agent.get(TICKET_TEST_ROUTE.GET_TICKETS);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe(TICKET_SUCCESS_MESSAGE.GET_TICKETS);
-      expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBeGreaterThan(0);
+      expect(Array.isArray(response.body.data.data)).toBe(true);
+      expect(response.body.data.data.length).toBeGreaterThan(0);
+      expect(response.body.data.pagination).toBeDefined();
+      expect(response.body.data.pagination).toHaveProperty("nextUrl");
+      expect(response.body.data.pagination).toHaveProperty("previousUrl");
+    });
+
+    it("should paginate tickets using limit and cursor", async () => {
+      const auth = await authenticate();
+      await seedTicket(3, { categoryId });
+
+      const resPage1 = await auth.agent
+        .get(TICKET_TEST_ROUTE.GET_TICKETS)
+        .query({ limit: 2 });
+
+      expect(resPage1.status).toBe(200);
+      expect(resPage1.body.data.data.length).toBe(2);
+      expect(resPage1.body.data.pagination.nextCursor).not.toBeNull();
+      expect(resPage1.body.data.pagination.nextUrl).toContain("cursor=");
+
+      const nextCursor = resPage1.body.data.pagination.nextCursor;
+      const resPage2 = await auth.agent
+        .get(TICKET_TEST_ROUTE.GET_TICKETS)
+        .query({ limit: 2, cursor: nextCursor });
+
+      expect(resPage2.status).toBe(200);
+      expect(resPage2.body.data.data.length).toBeGreaterThan(0);
+      expect(resPage2.body.data.pagination.previousUrl).toContain("direction=backward");
     });
 
     it("should filter tickets by creatorId", async () => {
@@ -49,8 +75,8 @@ describe("Ticket feature tests", () => {
         .query({ creatorId: auth.user.id });
 
       expect(response.status).toBe(200);
-      expect(response.body.data.length).toBeGreaterThan(0);
-      expect(response.body.data.every((t: any) => t.creatorId === auth.user.id)).toBe(true);
+      expect(response.body.data.data.length).toBeGreaterThan(0);
+      expect(response.body.data.data.every((t: any) => t.creatorId === auth.user.id)).toBe(true);
     });
 
     it("should filter tickets by assigneeId", async () => {
@@ -62,8 +88,8 @@ describe("Ticket feature tests", () => {
         .query({ assigneeId: auth.user.id });
 
       expect(response.status).toBe(200);
-      expect(response.body.data).toHaveLength(1);
-      expect(response.body.data[0].id).toBe(assigneeTicket.id);
+      expect(response.body.data.data).toHaveLength(1);
+      expect(response.body.data.data[0].id).toBe(assigneeTicket.id);
     });
 
     it("should filter tickets by code", async () => {
@@ -76,8 +102,8 @@ describe("Ticket feature tests", () => {
         .query({ code: customCode });
 
       expect(response.status).toBe(200);
-      expect(response.body.data).toHaveLength(1);
-      expect(response.body.data[0].code).toBe(customCode);
+      expect(response.body.data.data).toHaveLength(1);
+      expect(response.body.data.data[0].code).toBe(customCode);
     });
 
     it("should filter tickets by status", async () => {
@@ -90,8 +116,8 @@ describe("Ticket feature tests", () => {
         .query({ status: TicketStatus.in_progress });
 
       expect(response.status).toBe(200);
-      expect(response.body.data.length).toBeGreaterThan(0);
-      expect(response.body.data.every((t: any) => t.status === TicketStatus.in_progress)).toBe(true);
+      expect(response.body.data.data.length).toBeGreaterThan(0);
+      expect(response.body.data.data.every((t: any) => t.status === TicketStatus.in_progress)).toBe(true);
     });
 
     it("should filter tickets by priority", async () => {
@@ -103,8 +129,8 @@ describe("Ticket feature tests", () => {
         .query({ priority: TicketPriority.critical });
 
       expect(response.status).toBe(200);
-      expect(response.body.data.length).toBeGreaterThan(0);
-      expect(response.body.data.every((t: any) => t.priority === TicketPriority.critical)).toBe(true);
+      expect(response.body.data.data.length).toBeGreaterThan(0);
+      expect(response.body.data.data.every((t: any) => t.priority === TicketPriority.critical)).toBe(true);
     });
 
     it("should filter tickets by combined parameters (status and priority)", async () => {
@@ -120,9 +146,9 @@ describe("Ticket feature tests", () => {
         .query({ status: TicketStatus.resolved, priority: TicketPriority.high });
 
       expect(response.status).toBe(200);
-      expect(response.body.data.length).toBeGreaterThan(0);
+      expect(response.body.data.data.length).toBeGreaterThan(0);
       expect(
-        response.body.data.every(
+        response.body.data.data.every(
           (t: any) => t.status === TicketStatus.resolved && t.priority === TicketPriority.high
         )
       ).toBe(true);
