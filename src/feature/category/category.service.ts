@@ -1,9 +1,16 @@
 import { prisma } from "../../shared/lib/prisma";
+import { paginate, type PaginationQuery } from "../../shared/utils/paginate";
+import type { Request } from "express";
 import type { CreateCategoryDto, UpdateCategoryDto } from "./category.dto";
 
 export class CategoryService {
-  async getCategories() {
-    return await prisma.category.findMany();
+  async getCategories(query: PaginationQuery = {}, req?: Request) {
+    return await paginate(prisma.category, {
+      cursor: query.cursor,
+      limit: query.limit,
+      direction: query.direction,
+      req,
+    });
   }
 
   async getCategory(id: string) {

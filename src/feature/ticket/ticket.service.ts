@@ -1,23 +1,27 @@
 import { prisma } from "../../shared/lib/prisma";
 import { userSelect } from "../../shared/select/user.select";
+import { paginate } from "../../shared/utils/paginate";
+import type { Request } from "express";
 import type { TicketQuery } from "./ticket.constant";
 import type { CreateTicketDto, UpdateTicketDto, UpdateTicketStatusDto } from "./ticket.dto";
 
 export class TicketService {
-  async getTickets(query: TicketQuery) {
+  async getTickets(query: TicketQuery, req?: Request) {
     const where = {
       creatorId: query.creatorId,
       assigneeId: query.assigneeId,
       code: query.code,
       status: query.status,
-      priority: query.priority
+      priority: query.priority,
     };
 
-    return prisma.ticket.findMany({
+    return paginate(prisma.ticket, {
       where,
-      orderBy: {
-        createdAt: "desc"
-      }
+      orderBy: { createdAt: "desc" },
+      cursor: query.cursor,
+      limit: query.limit,
+      direction: query.direction,
+      req,
     });
   }
 

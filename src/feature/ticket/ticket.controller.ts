@@ -11,7 +11,7 @@ export class TicketController {
   constructor(private readonly ticketService: TicketService) {}
 
   getTickets = asyncHandler(async(req: Request, res: Response) => {
-    const tickets = await this.ticketService.getTickets(req.query);
+    const tickets = await this.ticketService.getTickets(req.query, req);
     sendSuccess(res, TICKET_SUCCESS_MESSAGE.GET_TICKETS, tickets);
   });
 

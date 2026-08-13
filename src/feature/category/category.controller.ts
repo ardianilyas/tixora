@@ -10,7 +10,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   getCategories = asyncHandler(async(req: Request, res: Response) => {
-    const categories = await this.categoryService.getCategories();
+    const categories = await this.categoryService.getCategories(req.query, req);
     sendSuccess(res, CATEGORY_SUCCESS_MESSAGE.GET_CATEGORIES, categories);
   });
 

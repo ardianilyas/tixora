@@ -27,5 +27,8 @@ export type TicketQuery = {
   code?: string;
   status?: TicketStatus;
   priority?: TicketPriority;
+  cursor?: string;
+  limit?: number | string;
+  direction?: "forward" | "backward";
 };
 
