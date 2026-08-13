@@ -7,7 +7,7 @@ export class TicketService {
   async getTickets(query: TicketQuery) {
     const where = {
       creatorId: query.creatorId,
-      asigneeId: query.assigneeId,
+      assigneeId: query.assigneeId,
       code: query.code,
       status: query.status,
       priority: query.priority
@@ -82,6 +82,17 @@ export class TicketService {
       },
       data: {
         status
+      }
+    });
+  }
+
+  async assignTicketToAgent(assigneeId: string, ticketId: string) {
+    return prisma.ticket.update({
+      where: {
+        id: ticketId
+      },
+      data: {
+        assigneeId
       }
     });
   }

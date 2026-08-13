@@ -13,8 +13,12 @@ export const getTicketId = z.string();
 export const updateTicketStatusDto = z.object({
   status: z.enum(TicketStatus),
 });
+export const assignTicketToAgentDto = z.object({
+  assigneeId: z.string(),
+});
 
 export type CreateTicketDto = z.infer<typeof createTicketDto>;
 export type UpdateTicketDto = z.infer<typeof updateTicketDto>;
 export type GetTicketId = z.infer<typeof getTicketId>;
 export type UpdateTicketStatusDto = z.infer<typeof updateTicketStatusDto>;
+export type AssignTicketToAgentDto = z.infer<typeof assignTicketToAgentDto>;

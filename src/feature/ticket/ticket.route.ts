@@ -19,5 +19,6 @@ router.delete("/:id", ticketController.deleteTicket);
 
 router.use(requireRole("admin"));
 router.patch("/:id/status", ticketController.updateTicketStatus);
+router.patch("/:id/assignee", ticketController.assignTicketToAgent);
 
 export default router;

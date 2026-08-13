@@ -6,6 +6,7 @@ export const TICKET_SUCCESS_MESSAGE = {
   CREATE_TICKET: "Ticket created successfully",
   UPDATE_TICKET: "Ticket updated successfully",
   UPDATE_TICKET_STATUS: "Ticket status updated successfully",
+  ASSIGN_TICKET_TO_AGENT: "Ticket assigned to agent successfully",
 }
 
 export const TICKET_NOT_FOUND_MESSAGE = "Ticket not found";
@@ -17,6 +18,7 @@ export const TICKET_TEST_ROUTE = {
   UPDATE_TICKET: (id: string) => `/api/tickets/${id}`,
   DELETE_TICKET: (id: string) => `/api/tickets/${id}`,
   UPDATE_TICKET_STATUS: (id: string) => `/api/tickets/${id}/status`,
+  ASSIGN_TICKET_TO_AGENT: (id: string) => `/api/tickets/${id}/assignee`,
 };
 
 export type TicketQuery = {
