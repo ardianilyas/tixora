@@ -1,6 +1,6 @@
-import { prisma } from "../../shared/lib/prisma";
-import { userSelect } from "../../shared/select/user.select";
-import { paginate } from "../../shared/utils/paginate";
+import { prisma } from "@/shared/lib/prisma";
+import { userSelect } from "@/shared/select/user.select";
+import { paginate } from "@/shared/utils/paginate";
 import type { Request } from "express";
 import type { TicketQuery } from "./ticket.constant";
 import type { CreateTicketDto, UpdateTicketDto, UpdateTicketStatusDto } from "./ticket.dto";
@@ -99,5 +99,25 @@ export class TicketService {
         assigneeId
       }
     });
+  }
+
+  async closeExpiredOpenTickets() {
+    const cutoffDate = new Date(
+      Date.now() - 2 * 24 * 60 * 60 * 1000,
+    );
+    const result = await prisma.ticket.updateMany({
+      where: {
+        status: "open",
+        createdAt: {
+          lte: cutoffDate,
+        },
+      },
+      data: {
+        status: "resolved",
+        resolvedAt: new Date(),
+      },
+    });
+
+    return result.count;
   }
 }

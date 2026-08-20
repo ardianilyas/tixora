@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import request from "supertest";
-import app from "../src/server";
+import app from "@/server";
 import { authenticate } from "./helpers/auth.helper";
 
 describe("Auth Integration Tests (Prisma)", () => {

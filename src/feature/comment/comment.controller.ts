@@ -1,7 +1,7 @@
-import type { AuthenticatedRequest } from "../../shared/types";
-import { asyncHandler } from "../../shared/utils/async-handler";
-import { sendSuccess } from "../../shared/utils/response";
-import { validate } from "../../shared/utils/validate";
+import type { AuthenticatedRequest } from "@/shared/types";
+import { asyncHandler } from "@/shared/utils/async-handler";
+import { sendSuccess } from "@/shared/utils/response";
+import { validate } from "@/shared/utils/validate";
 import { COMMENT_SUCCESS_MESSAGE } from "./comment.constant";
 import { createCommentDto } from "./comment.dto";
 import type { CommentService } from "./comment.service";

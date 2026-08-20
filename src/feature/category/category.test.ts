@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import app from "../../server";
+import app from "@/server";
 import { authenticate } from "../../../tests/helpers/auth.helper";
 import { CATEGORY_NOT_FOUND_MESSAGE, CATEGORY_TEST_ROUTE } from "./category.constant";
-import { seedCategory } from "../../shared/seeder/category.seeder";
+import { seedCategory } from "@/shared/seeder/category.seeder";
 
 describe("Categories feature tests", () => {
   const invalidId = "invalid-id";

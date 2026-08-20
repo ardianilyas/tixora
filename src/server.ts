@@ -1,9 +1,9 @@
 import { toNodeHandler } from "better-auth/node";
 import express from "express";
-import { auth } from "./shared/lib/auth";
-import { errorHandler } from "./shared/middlewares/error-handler";
-import { env } from "./shared/config/env";
-import apiRoute from "./shared/routes";
+import { auth } from "@/shared/lib/auth";
+import { errorHandler } from "@/shared/middlewares/error-handler";
+import { env } from "@/shared/config/env";
+import apiRoute from "@/shared/routes";
 
 const app = express();
 const PORT = env.PORT;
@@ -16,8 +16,10 @@ app.use("/api", apiRoute);
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Listening on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    console.log(`Listening on http://localhost:${PORT}`);
+  });
+}
 
 export default app;

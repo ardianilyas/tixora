@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { TicketService } from "./ticket.service";
 import { TicketController } from "./ticket.controller";
-import { authMiddleware } from "../../shared/middlewares/auth.middleware";
-import { requireRole } from "../../shared/middlewares/require-role";
+import { authMiddleware } from "@/shared/middlewares/auth.middleware";
+import { requireRole } from "@/shared/middlewares/require-role";
 
 const router = Router();
 

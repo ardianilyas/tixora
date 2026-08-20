@@ -1,7 +1,7 @@
 import request from "supertest";
-import app from "../../src/server";
-import { prisma } from "../../src/shared/lib/prisma";
-import type { UserRole } from "../../src/shared/types/express";
+import app from "@/server";
+import { prisma } from "@/shared/lib/prisma";
+import type { UserRole } from "@/shared/types/express";
 
 export async function authenticate(role: UserRole = "user", customEmail?: string) {
   const agent = request.agent(app);

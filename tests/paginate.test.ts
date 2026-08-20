@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { paginate } from "../src/shared/utils/paginate";
+import { paginate } from "@/shared/utils/paginate";
 import type { Request } from "express";
 
 describe("Reusable Cursor Pagination (paginate)", () => {

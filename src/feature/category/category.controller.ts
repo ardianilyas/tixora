@@ -1,6 +1,6 @@
-import { asyncHandler } from "../../shared/utils/async-handler";
-import { sendSuccess } from "../../shared/utils/response";
-import { validate } from "../../shared/utils/validate";
+import { asyncHandler } from "@/shared/utils/async-handler";
+import { sendSuccess } from "@/shared/utils/response";
+import { validate } from "@/shared/utils/validate";
 import { CATEGORY_SUCCESS_MESSAGE } from "./category.constant";
 import { createCategoryDto, getCategoryId, updateCategoryDto } from "./category.dto";
 import type { CategoryService } from "./category.service";

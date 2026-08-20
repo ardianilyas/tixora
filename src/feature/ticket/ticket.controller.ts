@@ -1,7 +1,7 @@
-import type { AuthenticatedRequest } from "../../shared/types";
-import { asyncHandler } from "../../shared/utils/async-handler";
-import { sendSuccess } from "../../shared/utils/response";
-import { validate } from "../../shared/utils/validate";
+import type { AuthenticatedRequest } from "@/shared/types";
+import { asyncHandler } from "@/shared/utils/async-handler";
+import { sendSuccess } from "@/shared/utils/response";
+import { validate } from "@/shared/utils/validate";
 import { TICKET_SUCCESS_MESSAGE } from "./ticket.constant";
 import { assignTicketToAgentDto, createTicketDto, getTicketId, updateTicketDto, updateTicketStatusDto } from "./ticket.dto";
 import type { TicketService } from "./ticket.service";

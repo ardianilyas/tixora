@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
-import app from "../../server";
+import app from "@/server";
 import { authenticate } from "../../../tests/helpers/auth.helper";
 import { TICKET_NOT_FOUND_MESSAGE, TICKET_SUCCESS_MESSAGE, TICKET_TEST_ROUTE } from "./ticket.constant";
-import { seedCategory } from "../../shared/seeder/category.seeder";
-import { seedTicket } from "../../shared/seeder/ticket.seeder";
+import { seedCategory } from "@/shared/seeder/category.seeder";
+import { seedTicket } from "@/shared/seeder/ticket.seeder";
 import { TicketPriority, TicketStatus } from "../../../generated/prisma/enums";
-import { prisma } from "../../shared/lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 
 describe("Ticket feature tests", () => {
   const invalidId = "invalid-ticket-id";

@@ -1,5 +1,5 @@
-import { prisma } from "../../shared/lib/prisma";
-import { paginate, type PaginationQuery } from "../../shared/utils/paginate";
+import { prisma } from "@/shared/lib/prisma";
+import { paginate, type PaginationQuery } from "@/shared/utils/paginate";
 import type { Request } from "express";
 import type { CreateCategoryDto, UpdateCategoryDto } from "./category.dto";
 

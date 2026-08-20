@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { CommentService } from "./comment.service";
 import { CommentController } from "./comment.controller";
-import { authMiddleware } from "../../shared/middlewares/auth.middleware";
+import { authMiddleware } from "@/shared/middlewares/auth.middleware";
 
 const router = Router();
 

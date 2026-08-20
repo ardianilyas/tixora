@@ -1,4 +1,4 @@
-import { prisma } from "../../shared/lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 import type { CreateCommentDto } from "./comment.dto";
 
 export class CommentService {
