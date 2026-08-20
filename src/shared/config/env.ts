@@ -18,6 +18,10 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.string({
     error: "BETTER_AUTH_URL is required",
   }),
+
+  REDIS_URL: z.string({
+    error: "REDIS_URL is required",
+  })
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
