@@ -7,13 +7,10 @@ export type CreateCategoryData = {
   description?: string;
 };
 
-export async function seedCategory(overrides?: CreateCategoryData): Promise<Category>;
-export async function seedCategory(count: 1, overrides?: CreateCategoryData): Promise<Category>;
-export async function seedCategory(count: number, overrides?: CreateCategoryData): Promise<Category[]>;
 export async function seedCategory(
   countOrOverrides: number | CreateCategoryData = 1,
   overrideData: CreateCategoryData = {}
-): Promise<Category | Category[]> {
+): Promise<any> {
   const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
   const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 

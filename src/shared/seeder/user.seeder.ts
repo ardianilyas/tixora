@@ -17,13 +17,10 @@ export type SeededUser = User & {
   token?: string;
 };
 
-export async function seedUser(overrides?: SeedUserData): Promise<SeededUser>;
-export async function seedUser(count: 1, overrides?: SeedUserData): Promise<SeededUser>;
-export async function seedUser(count: number, overrides?: SeedUserData): Promise<SeededUser[]>;
 export async function seedUser(
   countOrOverrides: number | SeedUserData = 1,
   overrideData: SeedUserData = {}
-): Promise<SeededUser | SeededUser[]> {
+): Promise<any> {
   const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
   const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 

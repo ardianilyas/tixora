@@ -10,13 +10,10 @@ export type CreateCommentData = {
   ticketId?: string;
 };
 
-export async function seedComment(overrides?: CreateCommentData): Promise<Comment>;
-export async function seedComment(count: 1, overrides?: CreateCommentData): Promise<Comment>;
-export async function seedComment(count: number, overrides?: CreateCommentData): Promise<Comment[]>;
 export async function seedComment(
   countOrOverrides: number | CreateCommentData = 1,
   overrideData: CreateCommentData = {}
-): Promise<Comment | Comment[]> {
+): Promise<any> {
   const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
   const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 
