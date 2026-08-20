@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { prisma } from "../lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 import { TicketPriority, TicketStatus } from "../../../generated/prisma/enums";
 import { seedCategory } from "./category.seeder";
 import { seedUser } from "./user.seeder";
@@ -14,17 +14,9 @@ export type CreateTicketData = {
   creatorId?: string;
   assigneeId?: string;
   categoryId?: string;
+  createdAt?: Date;
 };
 
-/**
- * Seed Ticket factory function.
- *
- * Usage:
- * - seedTicket()                            -> Creates 1 ticket
- * - seedTicket({ priority: "high" })       -> Creates 1 ticket with overrides
- * - seedTicket(5)                           -> Creates 5 tickets
- * - seedTicket(5, { status: "resolved" })   -> Creates 5 tickets with overrides
- */
 export async function seedTicket(overrides?: CreateTicketData): Promise<Ticket>;
 export async function seedTicket(count: 1, overrides?: CreateTicketData): Promise<Ticket>;
 export async function seedTicket(count: number, overrides?: CreateTicketData): Promise<Ticket[]>;
@@ -35,17 +27,15 @@ export async function seedTicket(
   const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
   const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 
-  const tickets: Ticket[] = [];
+  const twoMonthsAgo = new Date();
+  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
-  for (let i = 0; i < count; i++) {
-    const categoryId = overrides.categoryId ?? (await seedCategory()).id;
-    const creatorId = overrides.creatorId ?? (await seedUser()).id;
-
-    let code = overrides.code;
-    if (!code || count > 1) {
-      const randomId = Math.random().toString(36).substring(2, 7).toUpperCase();
-      code = overrides.code && count === 1 ? overrides.code : `TXO-${Date.now().toString(36).toUpperCase()}-${randomId}-${i}`;
-    }
+  // Single ticket creation
+  if (count === 1) {
+    const categoryId = overrides.categoryId ?? (await prisma.category.findFirst({ select: { id: true } }))?.id ?? (await seedCategory()).id;
+    const creatorId = overrides.creatorId ?? (await prisma.user.findFirst({ select: { id: true } }))?.id ?? (await seedUser()).id;
+    const randomId = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const code = overrides.code ?? `TXO-${Date.now().toString(36).toUpperCase()}-${randomId}-0`;
 
     const ticket = await prisma.ticket.create({
       data: {
@@ -57,15 +47,48 @@ export async function seedTicket(
         creatorId,
         assigneeId: overrides.assigneeId,
         categoryId,
+        createdAt: overrides.createdAt ?? new Date(),
       },
     });
 
-    tickets.push(ticket);
+    return ticket;
   }
 
-  if (count === 1) {
-    return tickets[0]!;
+  // Bulk ticket creation with Array.from
+  let categoryIds = (await prisma.category.findMany({ select: { id: true } })).map((c) => c.id);
+  if (categoryIds.length === 0) {
+    const newCat = await seedCategory();
+    categoryIds = [newCat.id];
   }
+
+  let userIds = (await prisma.user.findMany({ select: { id: true } })).map((u) => u.id);
+  if (userIds.length === 0) {
+    const newUser = await seedUser();
+    userIds = [newUser.id];
+  }
+
+  const data = Array.from({ length: count }, (_, i) => {
+    const randomId = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const code = overrides.code ? `${overrides.code}-${i}` : `TXO-${Date.now().toString(36).toUpperCase()}-${randomId}-${i}`;
+    const categoryId = overrides.categoryId ?? faker.helpers.arrayElement(categoryIds);
+    const creatorId = overrides.creatorId ?? faker.helpers.arrayElement(userIds);
+
+    return {
+      code,
+      title: overrides.title ?? faker.lorem.sentence(),
+      description: overrides.description ?? faker.lorem.paragraph(),
+      status: overrides.status ?? TicketStatus.open,
+      priority: overrides.priority ?? TicketPriority.low,
+      creatorId,
+      assigneeId: overrides.assigneeId,
+      categoryId,
+      createdAt: overrides.createdAt ?? faker.date.between({ from: twoMonthsAgo, to: new Date() }),
+    };
+  });
+
+  const tickets = await prisma.ticket.createManyAndReturn({
+    data,
+  });
 
   return tickets;
 }

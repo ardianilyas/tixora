@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { prisma } from "../lib/prisma";
-import type { Comment } from "../../../generated/prisma/client";
+import { prisma } from "@/shared/lib/prisma";
 import { seedTicket } from "./ticket.seeder";
 import { seedUser } from "./user.seeder";
+import type { Comment } from "../../../generated/prisma/client";
 
 export type CreateCommentData = {
   body?: string;
@@ -10,15 +10,6 @@ export type CreateCommentData = {
   ticketId?: string;
 };
 
-/**
- * Seed Comment factory function.
- *
- * Usage:
- * - seedComment()                             -> Creates 1 comment
- * - seedComment({ body: "Hello" })            -> Creates 1 comment with overrides
- * - seedComment(5)                            -> Creates 5 comments
- * - seedComment(5, { ticketId: "..." })       -> Creates 5 comments with overrides
- */
 export async function seedComment(overrides?: CreateCommentData): Promise<Comment>;
 export async function seedComment(count: 1, overrides?: CreateCommentData): Promise<Comment>;
 export async function seedComment(count: number, overrides?: CreateCommentData): Promise<Comment[]>;
@@ -29,11 +20,9 @@ export async function seedComment(
   const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
   const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 
-  const comments: Comment[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const authorId = overrides.authorId ?? (await seedUser()).id;
-    const ticketId = overrides.ticketId ?? (await seedTicket()).id;
+  if (count === 1) {
+    const authorId = overrides.authorId ?? (await prisma.user.findFirst({ select: { id: true } }))?.id ?? (await seedUser()).id;
+    const ticketId = overrides.ticketId ?? (await prisma.ticket.findFirst({ select: { id: true } }))?.id ?? (await seedTicket()).id;
 
     const comment = await prisma.comment.create({
       data: {
@@ -43,9 +32,31 @@ export async function seedComment(
       },
     });
 
-    comments.push(comment);
+    return comment;
   }
 
-  if (count === 1) return comments[0]!;
+  // Bulk comment creation with Array.from
+  let userIds = (await prisma.user.findMany({ select: { id: true } })).map((u) => u.id);
+  if (userIds.length === 0) {
+    const newUser = await seedUser();
+    userIds = [newUser.id];
+  }
+
+  let ticketIds = (await prisma.ticket.findMany({ select: { id: true } })).map((t) => t.id);
+  if (ticketIds.length === 0) {
+    const newTicket = await seedTicket();
+    ticketIds = [newTicket.id];
+  }
+
+  const data = Array.from({ length: count }, () => ({
+    body: overrides.body ?? faker.lorem.sentences(2),
+    authorId: overrides.authorId ?? faker.helpers.arrayElement(userIds),
+    ticketId: overrides.ticketId ?? faker.helpers.arrayElement(ticketIds),
+  }));
+
+  const comments = await prisma.comment.createManyAndReturn({
+    data,
+  });
+
   return comments;
 }

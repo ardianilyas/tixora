@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { auth } from "../lib/auth";
-import { prisma } from "../lib/prisma";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/prisma";
 import type { Role, User } from "../../../generated/prisma/client";
 
 export type SeedUserData = {
@@ -17,15 +17,6 @@ export type SeededUser = User & {
   token?: string;
 };
 
-/**
- * Seed User factory function.
- *
- * Usage:
- * - seedUser()                          -> Creates 1 user
- * - seedUser({ role: "admin" })         -> Creates 1 user with overrides
- * - seedUser(5)                         -> Creates 5 users
- * - seedUser(5, { role: "admin" })      -> Creates 5 users with overrides
- */
 export async function seedUser(overrides?: SeedUserData): Promise<SeededUser>;
 export async function seedUser(count: 1, overrides?: SeedUserData): Promise<SeededUser>;
 export async function seedUser(count: number, overrides?: SeedUserData): Promise<SeededUser[]>;
@@ -36,39 +27,42 @@ export async function seedUser(
   const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
   const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 
-  const users: SeededUser[] = [];
+  const users = await Promise.all(
+    Array.from({ length: count }, async (_, i) => {
+      const randomId = Math.random().toString(36).substring(2, 9);
+      const name = overrides.name
+        ? (count === 1 ? overrides.name : `${overrides.name} ${i + 1}`)
+        : faker.person.fullName();
+      const email = overrides.email
+        ? (count === 1 ? overrides.email : `user-${Date.now()}-${randomId}-${i}@example.com`)
+        : `user-${Date.now()}-${randomId}-${i}@example.com`;
+      const password = overrides.password ?? "Password123!";
+      const role = overrides.role ?? "user";
 
-  for (let i = 0; i < count; i++) {
-    const randomId = Math.random().toString(36).substring(2, 9);
-    const name = overrides.name ?? faker.person.fullName();
-    const email = overrides.email ?? `user-${Date.now()}-${randomId}-${i}@example.com`;
-    const password = overrides.password ?? "Password123!";
-    const role = overrides.role ?? "user";
+      const res = await auth.api.signUpEmail({
+        body: { name, email, password },
+      });
 
-    const res = await auth.api.signUpEmail({
-      body: { name, email, password },
-    });
+      if (!res?.user) {
+        throw new Error("Failed to create user via better-auth");
+      }
 
-    if (!res?.user) {
-      throw new Error("Failed to create user via better-auth");
-    }
+      const updatedUser = await prisma.user.update({
+        where: { id: res.user.id },
+        data: {
+          role,
+          image: overrides.image ?? res.user.image,
+          emailVerified: overrides.emailVerified ?? res.user.emailVerified,
+        },
+      });
 
-    const updatedUser = await prisma.user.update({
-      where: { id: res.user.id },
-      data: {
-        role,
-        image: overrides.image ?? res.user.image,
-        emailVerified: overrides.emailVerified ?? res.user.emailVerified,
-      },
-    });
+      return {
+        ...updatedUser,
+        plainPassword: password,
+        token: res.token ?? undefined,
+      };
+    })
+  );
 
-    users.push({
-      ...updatedUser,
-      plainPassword: password,
-      token: res.token ?? undefined,
-    });
-  }
-
-  if (count === 1) return users[0]!;
-  return users;
+  return count === 1 ? users[0]! : users;
 }

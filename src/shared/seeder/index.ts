@@ -1,8 +1,8 @@
-import { prisma } from "../lib/prisma";
-import { seedCategory } from "./category.seeder";
-import { seedComment } from "./comment.seeder";
-import { seedTicket } from "./ticket.seeder";
-import { seedUser } from "./user.seeder";
+import { prisma } from "@/shared/lib/prisma";
+import { seedCategory } from "@/shared/seeder/category.seeder";
+import { seedComment } from "@/shared/seeder/comment.seeder";
+import { seedTicket } from "@/shared/seeder/ticket.seeder";
+import { seedUser } from "@/shared/seeder/user.seeder";
 
 async function main() {
   console.log("🌱 Seeding database...");
@@ -10,13 +10,13 @@ async function main() {
   const users = await seedUser(5);
   console.log(`✅ Created ${users.length} users`);
 
-  const categories = await seedCategory(5);
+  const categories = await seedCategory(50);
   console.log(`✅ Created ${categories.length} categories`);
 
-  const tickets = await seedTicket(10);
+  const tickets = await seedTicket(100);
   console.log(`✅ Created ${tickets.length} tickets`);
 
-  const comments = await seedComment(15);
+  const comments = await seedComment(150);
   console.log(`✅ Created ${comments.length} comments`);
 
   console.log("🎉 Database seeding completed!");

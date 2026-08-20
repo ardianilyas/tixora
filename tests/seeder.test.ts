@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { seedCategory } from "../src/shared/seeder/category.seeder";
-import { seedComment } from "../src/shared/seeder/comment.seeder";
-import { seedTicket } from "../src/shared/seeder/ticket.seeder";
-import { seedUser } from "../src/shared/seeder/user.seeder";
+import { seedCategory } from "@/shared/seeder/category.seeder";
+import { seedComment } from "@/shared/seeder/comment.seeder";
+import { seedTicket } from "@/shared/seeder/ticket.seeder";
+import { seedUser } from "@/shared/seeder/user.seeder";
 
 describe("Seeder Factory Tests (Laravel Factory Style)", () => {
   it("should seed single category with default and override data", async () => {
