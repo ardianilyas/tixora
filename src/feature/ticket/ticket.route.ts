@@ -3,10 +3,12 @@ import { TicketService } from "./ticket.service";
 import { TicketController } from "./ticket.controller";
 import { authMiddleware } from "@/shared/middlewares/auth.middleware";
 import { requireRole } from "@/shared/middlewares/require-role";
+import { TicketPolicy } from "./ticket.policy";
 
 const router = Router();
 
-const ticketService = new TicketService();
+const ticketPolicy = new TicketPolicy();
+const ticketService = new TicketService(ticketPolicy);
 const ticketController = new TicketController(ticketService);
 
 router.use(authMiddleware);

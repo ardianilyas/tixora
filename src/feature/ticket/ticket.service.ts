@@ -4,8 +4,13 @@ import { paginate } from "@/shared/utils/paginate";
 import type { Request } from "express";
 import type { TicketQuery } from "./ticket.constant";
 import type { CreateTicketDto, UpdateTicketDto, UpdateTicketStatusDto } from "./ticket.dto";
+import type { User } from "@/shared/types/express";
+import type { TicketPolicy } from "./ticket.policy";
+import { ForbiddenError } from "@/shared/errors/forbidden";
 
 export class TicketService {
+  constructor(private readonly ticketPolicy: TicketPolicy) {}
+
   async getTickets(query: TicketQuery, req?: Request) {
     const where = {
       creatorId: query.creatorId,
@@ -25,8 +30,8 @@ export class TicketService {
     });
   }
 
-  async getTicket(id: string) {
-    return prisma.ticket.findUniqueOrThrow({
+  async getTicket(id: string, user: User) {
+    const ticketData = await prisma.ticket.findUniqueOrThrow({
       where: {
         id
       },
@@ -43,6 +48,12 @@ export class TicketService {
         }
       }
     });
+
+    if(!this.ticketPolicy.view(user, ticketData)) {
+      throw new ForbiddenError("Forbidden to access this resource");
+    }
+
+    return ticketData;
   }
 
   async countTicket() {

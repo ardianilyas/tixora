@@ -15,9 +15,9 @@ export class TicketController {
     sendSuccess(res, TICKET_SUCCESS_MESSAGE.GET_TICKETS, tickets);
   });
 
-  getTicket = asyncHandler(async(req: Request, res: Response) => {
+  getTicket = asyncHandler(async(req: AuthenticatedRequest, res: Response) => {
     const id = validate(getTicketId, req.params.id);
-    const ticket = await this.ticketService.getTicket(id);
+    const ticket = await this.ticketService.getTicket(id, req.auth.user);
     sendSuccess(res, TICKET_SUCCESS_MESSAGE.GET_TICKET, ticket);
   });
 

@@ -11,6 +11,8 @@ export interface SessionUser {
   image?: string | null | undefined;
 }
 
+export type User = SessionUser;
+
 export interface AuthSession {
   session: {
     id: string;

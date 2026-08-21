@@ -170,15 +170,24 @@ describe("Ticket feature tests", () => {
       expect(response.body.message).toBe(TICKET_NOT_FOUND_MESSAGE);
     });
 
-    it("should return 200 and ticket details when found", async () => {
+    it("should return 403 when user try to access other user's ticket", async () => {
       const auth = await authenticate();
       const response = await auth.agent.get(TICKET_TEST_ROUTE.GET_TICKET(sampleTicketId));
+
+      expect(response.status).toBe(403);
+      expect(response.body.message).toBe("Forbidden to access this resource");
+    })
+
+    it("should return 200 and ticket details when found", async () => {
+      const auth = await authenticate();
+      const ticket = await seedTicket({ creatorId: auth.user.id });
+      const response = await auth.agent.get(TICKET_TEST_ROUTE.GET_TICKET(ticket.id));
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe(TICKET_SUCCESS_MESSAGE.GET_TICKET);
       expect(response.body.data).toBeDefined();
-      expect(response.body.data.id).toBe(sampleTicketId);
+      expect(response.body.data.id).toBe(ticket.id);
     });
   });
 
