@@ -17,10 +17,24 @@ export type CreateTicketData = {
   createdAt?: Date;
 };
 
+export function seedTicket(
+  overrides: CreateTicketData
+): Promise<Ticket>;
+
+export function seedTicket(
+  count: 1,
+  overrides?: CreateTicketData
+): Promise<Ticket>;
+
+export function seedTicket(
+  count: number,
+  overrides?: CreateTicketData
+): Promise<Ticket[]>;
+
 export async function seedTicket(
   countOrOverrides: number | CreateTicketData = 1,
   overrideData: CreateTicketData = {}
-): Promise<any> {
+): Promise<Ticket | Ticket[]> {
   const count = typeof countOrOverrides === "number" ? countOrOverrides : 1;
   const overrides = typeof countOrOverrides === "object" ? countOrOverrides : overrideData;
 

@@ -52,7 +52,7 @@ describe("Ticket feature tests", () => {
         .query({ limit: 2 });
 
       expect(resPage1.status).toBe(200);
-      expect(resPage1.body.data.data.length).toBe(2);
+      expect(resPage1.body.data.data).toHaveLength(2);
       expect(resPage1.body.data.pagination.nextCursor).not.toBeNull();
       expect(resPage1.body.data.pagination.nextUrl).toContain("cursor=");
 
